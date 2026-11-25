@@ -83,7 +83,7 @@ La misma documentación ofrece la imagen `scorespec/score-compose`. Para esta de
 
 Terminal en la raíz del repo. Git Bash o PowerShell. Las dos páginas son independientes: se puede levantar solo una, o las dos a la vez porque usan puertos distintos (8080 y 8081).
 
-La página que sirve `GET /` es, a propósito, una portada con la materia, el grupo y los integrantes — **la misma exacta en los dos puertos**. No tiene la lista de tareas: esa API sigue ahí (`/tareas`, `/salud`) y se prueba por `curl` o Postman, pero lo que se proyecta en el navegador es el contraste de infraestructura, no el CRUD. Si en algún momento quieren volver a mostrar el CRUD en el navegador, es cuestión de pedirlo.
+La página que sirve `GET /` es, a propósito, **la misma exacta en los dos puertos**: el mismo formulario de "Lista de Tareas" arriba, y abajo, como pie de página, la materia, el grupo y los integrantes. El servidor no abre el puerto hasta que logra conectarse a Postgres (ver `app/server.js`), así que la lista funcionando es en sí misma la prueba de que la base de datos de cada lado quedó arriba — no hace falta `curl` para demostrarlo, aunque sigue disponible (`/tareas`, `/salud`) por si lo prefieren para una prueba más rápida en terminal.
 
 ### 2.1 Página "Docker" (`proyecto-devops/`), sin plataforma
 
@@ -266,20 +266,17 @@ Decir: "Este archivo no está en git. Lo escribió `score-compose`. Ahí está P
 
 Cuando termine, va a aparecer el resumen de `plataforma/resumen.sh`.
 
-### 6:00 a 6:30. Probar que el servicio funciona, sin abrir el navegador todavía
+### 6:00 a 6:30. Agregar una tarea en el navegador
 
-```bash
-curl -X POST http://localhost:8081/tareas -H "Content-Type: application/json" -d '{"titulo":"preparar la exposicion"}'
-curl http://localhost:8081/tareas
-```
+Abrir [http://localhost:8081](http://localhost:8081). Escribir "preparar la exposición" y Agregar. Borrarla.
 
-Decir: "El servicio funciona igual que el de la página 8080: misma app, mismo contrato. Lo que prueba la plataforma no es que la página se vea linda, es que el servicio responde."
+Decir: "El servidor no abre este puerto hasta que logra hablar con Postgres — si están viendo la página, ya hablaron. Y acá se ve: la tarea se guarda de verdad, en una base que nadie de nosotros configuró a mano."
 
 ### 6:30 a 6:50. Las dos páginas, lado a lado
 
-Abrir dos pestañas: [http://localhost:8080](http://localhost:8080) y [http://localhost:8081](http://localhost:8081).
+Abrir otra pestaña con [http://localhost:8080](http://localhost:8080), al lado de la de 8081.
 
-Decir: "Miren: es la misma página, pixel por pixel. No cambié ni una línea de la aplicación. Lo único que cambió fue todo lo que no se ve: cómo se construyó la imagen, cómo se conectó a la base, cuánto código tuvo que escribir alguien para que esto llegue a funcionar."
+Decir: "Miren: es la misma página, pixel por pixel, mismo formulario, misma lista. No cambié ni una línea de la aplicación. Cada una tiene su propia base de datos atrás, pero lo único que cambió de verdad es todo lo que no se ve: cómo se construyó la imagen, cómo se conectó a esa base, cuánto código tuvo que escribir alguien para que esto llegue a funcionar."
 
 ### 6:50 a 7:40. La complejidad no desapareció
 
@@ -369,3 +366,11 @@ Se cambió la portada (sin la lista de tareas en el navegador, sin el badge que 
 - La API de tareas sigue funcionando en los dos puertos aunque no se muestre en la página (se puede probar con `curl -X POST .../tareas` como en la sección 4).
 
 Para la próxima sesión: las dos páginas quedaron arriba (8080 y 8081) después de esta prueba. Bajalas con la sección 2.3 cuando termines de mirarlas, para no dejar contenedores corriendo de más.
+
+### Volvió la lista de tareas, con otro diseño (tercera vuelta)
+
+Se decidió volver a mostrar el CRUD en el navegador: el header ahora dice "Lista de Tareas" y tiene el formulario funcional en una tarjeta blanca; lo que antes era la portada (materia, grupo, integrantes) pasó a ser el pie de página, más chico. Sigue siendo fondo degradado azul y sigue siendo la misma página en los dos puertos.
+
+- `npm test` en `app/`: 2 tests, ok.
+- Contra `http://localhost:8080`: `POST /tareas` creó una tarea (201), se vio en la lista en el navegador, `DELETE` la borró (204) y la lista volvió a quedar vacía.
+- `diff` entre `http://localhost:8080/` y `http://localhost:8081/`: sin diferencias (antes de agregar tareas — cada lado tiene su propia base, así que el contenido de la lista en sí puede divergir una vez que se usan; el HTML y el diseño son siempre idénticos).
