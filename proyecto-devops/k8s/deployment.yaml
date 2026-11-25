@@ -1,0 +1,75 @@
+# Pods de la API. La imagen la produce el pipeline.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lista-tareas
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: lista-tareas
+  template:
+    metadata:
+      labels:
+        app: lista-tareas
+    spec:
+      containers:
+        - name: web
+          image: lista-tareas:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: lista-tareas-db
+                  key: DB_HOST
+            - name: DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: lista-tareas-db
+                  key: DB_PORT
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: lista-tareas-db
+                  key: DB_NAME
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: lista-tareas-db
+                  key: DB_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: lista-tareas-db
+                  key: DB_PASSWORD
+          startupProbe:
+            httpGet:
+              path: /salud
+              port: http
+            periodSeconds: 5
+            failureThreshold: 12
+          readinessProbe:
+            httpGet:
+              path: /salud
+              port: http
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /salud
+              port: http
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            allowPrivilegeEscalation: false

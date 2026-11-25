@@ -1,0 +1,23 @@
+# Entrada HTTP con host y TLS.
+# El Secret tareas-tls (el certificado) lo crea el cluster. No esta en este repo.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: lista-tareas
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - tareas.demo.local
+      secretName: tareas-tls
+  rules:
+    - host: tareas.demo.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: lista-tareas
+                port:
+                  number: 8080

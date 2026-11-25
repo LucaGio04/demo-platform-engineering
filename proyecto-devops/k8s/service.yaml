@@ -1,0 +1,12 @@
+# Service estable para llegar a los pods de la API.
+apiVersion: v1
+kind: Service
+metadata:
+  name: lista-tareas
+spec:
+  selector:
+    app: lista-tareas
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
