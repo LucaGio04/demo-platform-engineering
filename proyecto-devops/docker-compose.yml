@@ -1,0 +1,39 @@
+# Lo que el equipo escribe a mano para levantar esto con Docker, sin Kubernetes
+# y sin plataforma. Mismo Dockerfile y misma app que proyecto-platform, pero
+# acá la red, el volumen, las variables y la contraseña las escribe una persona.
+#
+# No se cuenta en scripts/contar.sh: esa comparación es contra los k8s/ que
+# describen el camino real a producción. Este archivo es solo para poder
+# levantar esta página en la demo sin necesitar un cluster.
+services:
+  web:
+    build:
+      context: ..
+      dockerfile: proyecto-devops/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: tareas
+      DB_USER: tareas
+      DB_PASSWORD: tareas-demo
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: tareas
+      POSTGRES_USER: tareas
+      POSTGRES_PASSWORD: tareas-demo
+    volumes:
+      - datos:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tareas"]
+      interval: 5s
+      retries: 10
+
+volumes:
+  datos:

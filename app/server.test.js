@@ -17,7 +17,7 @@ test("la pagina principal responde", async () => {
     const respuesta = await fetch(`http://127.0.0.1:${port}/`);
     const cuerpo = await respuesta.text();
     assert.equal(respuesta.status, 200);
-    assert.match(cuerpo, /Lista de tareas/);
+    assert.match(cuerpo, /Grupo 11/);
   } finally {
     await new Promise((resolver) => server.close(resolver));
   }

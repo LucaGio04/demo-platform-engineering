@@ -1,6 +1,7 @@
 apiVersion: score.dev/v1b1
 metadata:
   name: lista-tareas
+  owner: squad-tareas
 containers:
   web:
     image: .
@@ -17,3 +18,5 @@ service:
 resources:
   db:
     type: postgres
+    params:
+      size: postgres-small
